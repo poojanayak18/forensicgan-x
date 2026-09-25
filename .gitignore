@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# Model weights
+*.pt
+*.pth
+
+# Generated results
+results/*
+!results/README.md
+
+# Generated storage
+storage/*
+!storage/README.md
+
+# Test evidence
+test_data/*
+!test_data/README.md
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
