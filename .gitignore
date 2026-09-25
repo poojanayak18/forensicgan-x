@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Virtual environment
+# Virtual environments
 .venv/
 venv/
 env/
@@ -16,17 +16,17 @@ env/
 *.pt
 *.pth
 
-# Generated results
-results/*
-!results/README.md
+# Generated AI-service results
+ai_service/results/*
+!ai_service/results/README.md
 
-# Generated storage
-storage/*
-!storage/README.md
+# Generated AI-service storage
+ai_service/storage/*
+!ai_service/storage/README.md
 
 # Test evidence
-test_data/*
-!test_data/README.md
+ai_service/test_data/*
+!ai_service/test_data/README.md
 
 # IDE
 .vscode/
