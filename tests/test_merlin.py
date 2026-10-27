@@ -1,7 +1,10 @@
-
 import pytest
 
-from ai.reasoning.merlin import evaluate_evidence
+from ai.reasoning.merlin import (
+    evaluate_evidence,
+    compare_evidence_records,
+    generate_merlin_report,
+)
 
 
 def test_average_detection_confidence():
@@ -57,8 +60,6 @@ def test_invalid_detections_structure():
     with pytest.raises(ValueError):
         evaluate_evidence(evidence)
 
-from ai.reasoning.merlin import compare_evidence_records
-
 
 def test_detects_timestamp_mismatch_for_same_evidence_id():
     records = [
@@ -69,7 +70,10 @@ def test_detects_timestamp_mismatch_for_same_evidence_id():
     result = compare_evidence_records(records)
 
     assert len(result["conflicts"]) == 1
-    assert result["conflicts"][0]["type"] == "duplicate_id_timestamp_mismatch"
+    assert (
+        result["conflicts"][0]["type"]
+        == "duplicate_id_timestamp_mismatch"
+    )
 
 
 def test_same_evidence_id_and_timestamp_has_no_conflict():
@@ -82,3 +86,29 @@ def test_same_evidence_id_and_timestamp_has_no_conflict():
 
     assert result["conflicts"] == []
 
+
+def test_generate_merlin_report():
+    records = [
+        {
+            "evidence_id": "E001",
+            "timestamp": "2026-09-25T10:00:00",
+            "detections": [
+                {"class": "person", "conf": 0.9}
+            ],
+        },
+        {
+            "evidence_id": "E001",
+            "timestamp": "2026-09-25T11:00:00",
+            "detections": [
+                {"class": "car", "conf": 0.7}
+            ],
+        },
+    ]
+
+    report = generate_merlin_report(records)
+
+    assert report["total_records"] == 2
+    assert len(report["evidence_summaries"]) == 2
+    assert len(report["conflicts"]) == 1
+    assert report["evidence_summaries"][0]["score"] == 90.0
+    assert report["evidence_summaries"][1]["score"] == 70.0

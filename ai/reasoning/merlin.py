@@ -116,3 +116,36 @@ def compare_evidence_records(evidence_records: list[dict]) -> dict:
             f"found {len(conflicts)} metadata inconsistency flag(s)."
         ),
     }
+def generate_merlin_report(evidence_records: list[dict]) -> dict:
+    """
+    MERLIN v0.3: Generate a combined evidence analysis report.
+
+    Summarizes individual evidence records and metadata conflicts.
+    This report supports human review; it does not prove guilt
+    or evidence tampering.
+    """
+
+    evidence_summaries = []
+
+    for record in evidence_records:
+        if not isinstance(record, dict):
+            continue
+
+        evidence_id = record.get("evidence_id", "UNKNOWN")
+
+        summary = evaluate_evidence(record)
+
+        evidence_summaries.append({
+            "evidence_id": evidence_id,
+            "score": summary["score"],
+            "explanation": summary["explanation"],
+        })
+
+    comparison = compare_evidence_records(evidence_records)
+
+    return {
+        "total_records": len(evidence_records),
+        "evidence_summaries": evidence_summaries,
+        "conflicts": comparison["conflicts"],
+        "explanation": comparison["explanation"],
+    }
