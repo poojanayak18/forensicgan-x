@@ -56,3 +56,29 @@ def test_invalid_detections_structure():
 
     with pytest.raises(ValueError):
         evaluate_evidence(evidence)
+
+from ai.reasoning.merlin import compare_evidence_records
+
+
+def test_detects_timestamp_mismatch_for_same_evidence_id():
+    records = [
+        {"evidence_id": "E001", "timestamp": "2026-09-25T10:00:00"},
+        {"evidence_id": "E001", "timestamp": "2026-09-25T11:00:00"},
+    ]
+
+    result = compare_evidence_records(records)
+
+    assert len(result["conflicts"]) == 1
+    assert result["conflicts"][0]["type"] == "duplicate_id_timestamp_mismatch"
+
+
+def test_same_evidence_id_and_timestamp_has_no_conflict():
+    records = [
+        {"evidence_id": "E001", "timestamp": "2026-09-25T10:00:00"},
+        {"evidence_id": "E001", "timestamp": "2026-09-25T10:00:00"},
+    ]
+
+    result = compare_evidence_records(records)
+
+    assert result["conflicts"] == []
+

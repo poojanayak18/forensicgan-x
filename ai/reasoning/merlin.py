@@ -56,3 +56,63 @@ def evaluate_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
         "conflicts": [],
         "explanation": explanation,
     }
+
+from datetime import datetime
+
+
+def compare_evidence_records(evidence_records: list[dict]) -> dict:
+    """
+    MERLIN v0.2: Compare evidence records for metadata inconsistencies.
+
+    Flags records that share an evidence_id but have different
+    non-empty timestamps.
+
+    This is a review flag, not proof of tampering.
+    """
+
+    conflicts = []
+    records_by_id = {}
+
+    for record in evidence_records:
+        if not isinstance(record, dict):
+            continue
+
+        evidence_id = record.get("evidence_id")
+        timestamp = record.get("timestamp")
+
+        if not isinstance(evidence_id, str) or not evidence_id.strip():
+            continue
+
+        if not isinstance(timestamp, str) or not timestamp.strip():
+            continue
+
+        # Validate that the timestamp is parseable.
+        try:
+            datetime.fromisoformat(timestamp)
+        except ValueError:
+            continue
+
+        records_by_id.setdefault(evidence_id, []).append(timestamp)
+
+    for evidence_id, timestamps in records_by_id.items():
+        unique_timestamps = sorted(set(timestamps))
+
+        if len(unique_timestamps) > 1:
+            conflicts.append({
+                "type": "duplicate_id_timestamp_mismatch",
+                "evidence_id": evidence_id,
+                "timestamps": unique_timestamps,
+                "explanation": (
+                    f"Evidence ID {evidence_id} appears with multiple "
+                    "timestamps. Review the source records to determine "
+                    "whether this is expected."
+                ),
+            })
+
+    return {
+        "conflicts": conflicts,
+        "explanation": (
+            f"Compared {len(evidence_records)} evidence record(s); "
+            f"found {len(conflicts)} metadata inconsistency flag(s)."
+        ),
+    }
